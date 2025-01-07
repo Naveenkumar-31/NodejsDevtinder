@@ -1,23 +1,30 @@
 const express = require("express");
-const { adminauth, userauth } = require("./middlewares/auth.js");
-
+const { connectDB } = require("./config/database");
+const User = require("./models/user");
 const app = express();
 
-app.use("/admin", adminauth);
+app.post("/signup", async (req, res) => {
+  const userObj = {
+    firstName: "Naveen",
+    lastName: "Ambala",
+    emailId: "naveen@gmail.com",
+    password: "12545",
+  };
 
-app.get("/user/get", userauth, (req, res) => {
-  console.log(req.params);
-  res.send("get called");
+  const user = await new User(userObj);
+
+  user.save();
+
+  res.send("successfully added to the data base");
 });
 
-app.get("/admin/get", (req, res) => {
-  res.send("admin get");
-});
-
-app.post("/admin/post", (req, res) => {
-  res.send("deleted");
-});
-
-app.listen(3000, () => {
-  console.log("successfully server is listening");
-});
+connectDB()
+  .then(() => {
+    console.log("daabase established");
+    app.listen(7777, () => {
+      console.log("successfully server is listening");
+    });
+  })
+  .catch((err) => {
+    console.error("database cannot be connected");
+  });
