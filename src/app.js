@@ -13,7 +13,7 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.send("data added to database ");
   } catch (err) {
-    res.status(400).send("Error saving the user" + err.message);
+    res.status(400).send("Error saving the user : " + err.message);
   }
 });
 
@@ -31,7 +31,7 @@ app.get("/user", async (req, res) => {
       res.send(users);
     }
   } catch (error) {
-    res.status(400).send("somethis their is a issue");
+    res.status(400).send("somethis their is a issue" + error.message);
   }
 });
 
@@ -60,14 +60,24 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userid", async (req, res) => {
   const data = req.body;
-
-  const userid = req.body.userid;
+  const userid = req.params.userid;
 
   try {
+    const ALLOWED_UPDATES = ["photoUrl", "skills", "gender"];
+
+    const isUpdateAllowed = Object.keys(data).every((k) => {
+      return ALLOWED_UPDATES.includes(k);
+    });
+
+    if (!isUpdateAllowed) {
+      throw new Error("updates not allowed");
+    }
+
     const user = await User.findByIdAndUpdate({ _id: userid }, data, {
       returnDocument: "before",
+      runValidators: true,
     });
 
     if (!user) {
@@ -75,8 +85,8 @@ app.patch("/user", async (req, res) => {
     } else {
       res.send(user + "data updated successfully");
     }
-  } catch {
-    res.status(400).send("something went wrong");
+  } catch (err) {
+    res.status(400).send("something went wrong : " + err.message);
   }
 });
 
