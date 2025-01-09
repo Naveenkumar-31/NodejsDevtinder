@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -46,7 +47,7 @@ const userSchema = new mongoose.Schema(
     photoUrl: {
       type: String,
       default:
-        "https://in.images.search.yahoo.com/search/images;_ylt=Awrx_mYTXH5nHckLMkK9HAx.;_ylu=c2VjA3NlYXJjaARzbGsDYnV0dG9u;_ylc=X1MDMjExNDcyMzAwNQRfcgMyBGZyA21jYWZlZQRmcjIDcDpzLHY6aSxtOnNiLXRvcARncHJpZAM4ZTFtaGJEQVFZbXR3bGJGTDh2eDZBBG5fcnNsdAMwBG5fc3VnZwMxMARvcmlnaW4DaW4uaW1hZ2VzLnNlYXJjaC55YWhvby5jb20EcG9zAzAEcHFzdHIDBHBxc3RybAMwBHFzdHJsAzM1BHF1ZXJ5A2RlZmF1bHQlMjBwaG90byUyMGltYWdlcyUyMHdpdGglMjBzbWFsbCUyMHVybAR0X3N0bXADMTczNjMzNDQ2OA--?p=default+photo+images+with+small+url&fr=mcafee&fr2=p%3As%2Cv%3Ai%2Cm%3Asb-top&ei=UTF-8&x=wrt&type=E211IN1357G0#id=0&iurl=https%3A%2F%2Fwww.pngarts.com%2Ffiles%2F10%2FDefault-Profile-Picture-PNG-Transparent-Image.png&action=click",
+        "https://in.images.search.yahoo.com/search/images;_ylt=Awrx_mYTXH5nHckLMkK9HAx.;_ylu=c2V",
     },
     skills: {
       type: [String],
@@ -59,5 +60,18 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign({ _id: user._id }, "Naveen$$$123");
+  return token;
+};
+
+userSchema.methods.validatePassword = async function (userInputPassword) {
+  const user = this;
+  const hashpassword = this.password;
+  const isValidPassword = await bcrypt.compare(userInputPassword, hashpassword);
+  return isValidPassword;
+};
 
 module.exports = mongoose.model("User", userSchema);
