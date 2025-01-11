@@ -49,6 +49,9 @@ const userSchema = new mongoose.Schema(
       default:
         "https://in.images.search.yahoo.com/search/images;_ylt=Awrx_mYTXH5nHckLMkK9HAx.;_ylu=c2V",
     },
+    about: {
+      type: String,
+    },
     skills: {
       type: [String],
       validate(value) {
